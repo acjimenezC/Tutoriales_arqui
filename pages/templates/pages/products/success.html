@@ -1,0 +1,24 @@
+{% extends 'pages/base.html' %}
+
+{% block title %} Product Created - Online Store {% endblock %}
+
+{% block header_title %} Product Created {% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-success mb-3">
+                        <i class="bi bi-check-circle"></i> Product created
+                    </h5>
+                    <p class="card-text mb-4">The product has been successfully created!</p>
+                    <a href="{% url 'pages:index' %}" class="btn btn-primary">View Products</a>
+                    <a href="{% url 'pages:create' %}" class="btn btn-secondary">Create Another</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

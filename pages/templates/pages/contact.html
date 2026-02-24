@@ -1,0 +1,36 @@
+{% extends 'pages/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block header_title %}{{ subtitle }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h3 class="mb-4">{{ subtitle }}</h3>
+        
+        <div class="card">
+            <div class="card-body">
+                <div class="mb-3">
+                    <h5 class="card-title">Email</h5>
+                    <p class="card-text">
+                        <a href="mailto:{{ email }}">{{ email }}</a>
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <h5 class="card-title">Phone</h5>
+                    <p class="card-text">
+                        <a href="tel:{{ phone }}">{{ phone }}</a>
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <h5 class="card-title">Address</h5>
+                    <p class="card-text">{{ address }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
