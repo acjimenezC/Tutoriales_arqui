@@ -16,6 +16,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from .models import Product
+from .utils import ImageLocalStorage
 
 
 class HomePageView(TemplateView):
@@ -231,3 +232,160 @@ class ProductCreatedView(TemplateView):
         context: Dict[str, Any] = super().get_context_data(**kwargs)
         context['title'] = 'Product created'
         return context
+
+
+class CartView(View):
+    """Display and manage shopping cart."""
+    
+    template_name: str = 'pages/cart/index.html'
+
+    def get(self, request: HttpRequest) -> HttpResponse:
+        """
+        Handle GET request to display cart.
+        
+        Args:
+            request: The HTTP request object.
+            
+        Returns:
+            Rendered template with cart contents.
+        """
+        # Simulated database for products
+        products: Dict[int, Dict[str, str]] = {
+            121: {'name': 'Tv samsung', 'price': '1000'},
+            11: {'name': 'Iphone', 'price': '2000'},
+        }
+
+        # Get cart products from session
+        cart_products: Dict[int, Dict[str, str]] = {}
+        cart_product_data: Dict[str, Any] = request.session.get('cart_product_data', {})
+
+        for key, product in products.items():
+            if str(key) in cart_product_data.keys():
+                cart_products[key] = product
+
+        # Prepare data for the view
+        view_data: Dict[str, Any] = {
+            'title': 'Cart - Online Store',
+            'subtitle': 'Shopping Cart',
+            'products': products,
+            'cart_products': cart_products
+        }
+        return render(request, self.template_name, view_data)
+
+    def post(self, request: HttpRequest, product_id: str) -> HttpResponseRedirect:
+        """
+        Handle POST request to add product to cart.
+        
+        Args:
+            request: The HTTP request object.
+            product_id: Product ID to add to cart.
+            
+        Returns:
+            Redirect to cart index.
+        """
+        # Get cart products from session and add the new product
+        cart_product_data: Dict[str, Any] = request.session.get('cart_product_data', {})
+        cart_product_data[product_id] = product_id
+        request.session['cart_product_data'] = cart_product_data
+
+        return redirect('pages:cart_index')
+
+
+class CartRemoveAllView(View):
+    """Handle removal of all products from cart."""
+
+    def post(self, request: HttpRequest) -> HttpResponseRedirect:
+        """
+        Handle POST request to remove all products from cart.
+        
+        Args:
+            request: The HTTP request object.
+            
+        Returns:
+            Redirect to cart index.
+        """
+        # Remove all products from cart in session
+        if 'cart_product_data' in request.session:
+            del request.session['cart_product_data']
+
+        return redirect('pages:cart_index')
+
+
+def ImageViewFactory(image_storage):
+    """
+    Factory function to create an ImageView with injected image storage.
+    
+    Args:
+        image_storage: An instance of ImageStorage implementation.
+        
+    Returns:
+        ImageView class configured with the provided image storage.
+    """
+    
+    class ImageView(View):
+        """Display and manage image uploads."""
+        
+        template_name: str = 'pages/images/index.html'
+
+        def get(self, request: HttpRequest) -> HttpResponse:
+            """
+            Handle GET request to display image upload form.
+            
+            Args:
+                request: The HTTP request object.
+                
+            Returns:
+                Rendered template with stored image URL.
+            """
+            image_url: str = request.session.get('image_url', '')
+            return render(request, self.template_name, {'image_url': image_url})
+
+        def post(self, request: HttpRequest) -> HttpResponseRedirect:
+            """
+            Handle POST request to store uploaded image.
+            
+            Args:
+                request: The HTTP request object containing the image file.
+                
+            Returns:
+                Redirect to image index page.
+            """
+            image_url: str = image_storage.store(request)
+            request.session['image_url'] = image_url
+            return redirect('pages:image_index')
+
+    return ImageView
+
+
+class ImageViewNoDI(View):
+    """Display and manage image uploads without dependency injection."""
+    
+    template_name: str = 'pages/images/index.html'
+
+    def get(self, request: HttpRequest) -> HttpResponse:
+        """
+        Handle GET request to display image upload form.
+        
+        Args:
+            request: The HTTP request object.
+            
+        Returns:
+            Rendered template with stored image URL.
+        """
+        image_url: str = request.session.get('image_url', '')
+        return render(request, self.template_name, {'image_url': image_url})
+
+    def post(self, request: HttpRequest) -> HttpResponseRedirect:
+        """
+        Handle POST request to store uploaded image.
+        
+        Args:
+            request: The HTTP request object containing the image file.
+            
+        Returns:
+            Redirect to image index page.
+        """
+        image_storage = ImageLocalStorage()
+        image_url = image_storage.store(request)
+        request.session['image_url'] = image_url
+        return redirect('pages:image_index')

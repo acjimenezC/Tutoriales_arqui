@@ -3,6 +3,8 @@ Configuración de la app pages.
 Define metadatos de la aplicación.
 """
 from django.apps import AppConfig
+from django.utils.module_loading import import_string
+from django.conf import settings
 
 
 class PagesConfig(AppConfig):
@@ -16,3 +18,7 @@ class PagesConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'pages'
     verbose_name = 'Páginas'
+
+    def ready(self):
+        """Initialize the app and load the image storage provider."""
+        ImageStorageClass = import_string(settings.IMAGE_STORAGE_CLASS)

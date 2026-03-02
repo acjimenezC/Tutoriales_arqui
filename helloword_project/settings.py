@@ -95,5 +95,12 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'pages' / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Media files (User uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Image Storage Provider
+IMAGE_STORAGE_CLASS = 'pages.utils.ImageLocalStorage'
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
